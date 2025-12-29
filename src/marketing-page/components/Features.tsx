@@ -11,19 +11,14 @@ import DevicesRoundedIcon from '@mui/icons-material/DevicesRounded';
 import EdgesensorHighRoundedIcon from '@mui/icons-material/EdgesensorHighRounded';
 import ViewQuiltRoundedIcon from '@mui/icons-material/ViewQuiltRounded';
 
-import adminLight from '../../assets/admin-dashboard-light.png';
-import adminDark from '../../assets/admin-dashboard-dark.png';
-import familyLight from '../../assets/family-profile-light.png';
-import familyDark from '../../assets/family-profile-dark.png';
-
 const items = [
   {
     icon: <ViewQuiltRoundedIcon />,
     title: 'Admin Dashboard',
     description:
       'Comprehensive admin dashboard for managing schedules, HR, payroll, financing, and overseeing all care operations efficiently.',
-    imageLight: `url(${adminLight})`,
-    imageDark: `url(${adminDark})`,
+    imageLight: 'url(https://caresuite-landing-assets.s3.eu-central-1.amazonaws.com/dashboard-light.png)',
+    imageDark: 'url(https://caresuite-landing-assets.s3.eu-central-1.amazonaws.com/dashboard-dark.png)',
   },
   {
     icon: <EdgesensorHighRoundedIcon />,
@@ -38,8 +33,8 @@ const items = [
     title: 'Family Dashboard',
     description:
       'Family dashboard for monitoring care plans, tracking progress, communicating with staff, and managing care details seamlessly.',
-    imageLight: `url(${familyLight})`,
-    imageDark: `url(${familyDark})`,
+    imageLight: 'url(https://caresuite-landing-assets.s3.eu-central-1.amazonaws.com/family-profile-light.png)',
+    imageDark: 'url(https://caresuite-landing-assets.s3.eu-central-1.amazonaws.com/family-profile-dark.png)',
   },
 ];
 
