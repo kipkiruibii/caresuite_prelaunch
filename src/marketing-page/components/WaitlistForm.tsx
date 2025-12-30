@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Box, Typography, Container, Card, CardContent, TextField, Button, MenuItem } from '@mui/material';
+import { Box, Typography, Container, Card, CardContent, TextField, Button, MenuItem, Snackbar, Alert } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(4),
   textAlign: 'center',
+  boxShadow: theme.shadows[4],
+  borderRadius: theme.spacing(2),
 }));
 
 const countries = [
@@ -209,6 +211,13 @@ export default function WaitlistForm() {
     email: '',
     country: '',
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error',
+  });
+  const [showThankYou, setShowThankYou] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -217,12 +226,48 @@ export default function WaitlistForm() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Waitlist submission:', formData);
-    // Here you would typically send the data to your backend
-    alert('Thank you for joining the waitlist! We will contact you soon.');
-    setFormData({ name: '', email: '', country: '' });
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('https://api.caresuite.care/api/v1/website/waiting-list', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          location: formData.country,
+        }),
+      });
+
+      if (response.ok) {
+        setSnackbar({
+          open: true,
+          message: 'Successfully joined the waitlist!',
+          severity: 'success',
+        });
+        setShowThankYou(true);
+        setFormData({ name: '', email: '', country: '' });
+      } else {
+        const errorData = await response.json();
+        setSnackbar({
+          open: true,
+          message: errorData.errors ? 'Please check your information and try again.' : 'Failed to join waitlist. Please try again.',
+          severity: 'error',
+        });
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: 'Network error. Please check your connection and try again.',
+        severity: 'error',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -231,56 +276,153 @@ export default function WaitlistForm() {
         <Box width={{ xs: '100%', md: '50%' }}>
           <StyledCard>
             <CardContent>
-              <Typography variant="h4" component="h2" gutterBottom>
-                Join Our Waitlist
-              </Typography>
-              <Typography variant="body1" paragraph>
-                Be among the first to experience CareSuite. Provide your information below, and we'll keep you updated on our progress and invite you to participate in our pilot program. Your input will be greatly appreciated in helping us improve the product further and refine its features.
-              </Typography>
-              <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
-                <TextField
-                  fullWidth
-                  label="Full Name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  sx={{ mb: 2 }}
-                />
-                <TextField
-                  fullWidth
-                  label="Email"
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  sx={{ mb: 2 }}
-                />
-                <TextField
-                  fullWidth
-                  select
-                  label="Business Location (Country)"
-                  name="country"
-                  value={formData.country}
-                  onChange={handleChange}
-                  required
-                  sx={{ mb: 2 }}
-                >
-                  {countries.map((country) => (
-                    <MenuItem key={country} value={country}>
-                      {country}
-                    </MenuItem>
-                  ))}
-                </TextField>
-                <Button type="submit" variant="contained" size="large" fullWidth>
-                  Join Waitlist
-                </Button>
-              </Box>
+              {showThankYou ? (
+                <>
+                  <Typography variant="h4" component="h2" gutterBottom>
+                    Thank You!
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    Thank you for joining our waitlist! We'll be in touch soon with updates about CareSuite and your invitation to participate in our pilot program.
+                  </Typography>
+                  <Button 
+                    variant="contained" 
+                    size="large" 
+                    fullWidth
+                    onClick={() => setShowThankYou(false)}
+                    sx={{ mt: 2, py: 1.5 }}
+                  >
+                    Join Another Person
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Typography variant="h4" component="h2" gutterBottom>
+                    Join Our Waitlist
+                  </Typography>
+                  <Typography variant="body1" paragraph>
+                    Be among the first to experience CareSuite. Provide your information below, and we'll keep you updated on our progress and invite you to participate in our pilot program. Your input will be greatly appreciated in helping us improve the product further and refine its features.
+                  </Typography>
+                  <Box component="form" onSubmit={handleSubmit} sx={{ mt: 4 }}>
+                    <TextField
+                      fullWidth
+                      variant="filled"
+                      label="Full Name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      sx={{ 
+                        mb: 3, 
+                        '& .MuiFilledInput-root': { 
+                          height: '56px',
+                          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.08)',
+                          },
+                          '&.Mui-focused': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          '&.Mui-focused': {
+                            color: 'primary.main',
+                          },
+                        },
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      variant="filled"
+                      label="Email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      sx={{ 
+                        mb: 3, 
+                        '& .MuiFilledInput-root': { 
+                          height: '56px',
+                          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.08)',
+                          },
+                          '&.Mui-focused': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          '&.Mui-focused': {
+                            color: 'primary.main',
+                          },
+                        },
+                      }}
+                    />
+                    <TextField
+                      fullWidth
+                      variant="filled"
+                      select
+                      label="Business Location (Country)"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      required
+                      sx={{ 
+                        mb: 3, 
+                        '& .MuiFilledInput-root': { 
+                          height: '56px',
+                          backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          '&:hover': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.08)',
+                          },
+                          '&.Mui-focused': {
+                            backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                          },
+                        },
+                        '& .MuiInputLabel-root': {
+                          '&.Mui-focused': {
+                            color: 'primary.main',
+                          },
+                        },
+                      }}
+                    >
+                      {countries.map((country) => (
+                        <MenuItem key={country} value={country}>
+                          {country}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                    <Button 
+                      type="submit" 
+                      variant="contained" 
+                      size="large" 
+                      fullWidth
+                      disabled={isSubmitting}
+                      sx={{ mt: 1, py: 1.5 }}
+                    >
+                      {isSubmitting ? 'Joining Waitlist...' : 'Join Waitlist'}
+                    </Button>
+                  </Box>
+                </>
+              )}
             </CardContent>
           </StyledCard>
         </Box>
       </Box>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={() => setSnackbar({ ...snackbar, open: false })} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }
