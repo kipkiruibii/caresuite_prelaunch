@@ -1,20 +1,20 @@
-# Use Node.js for building the app
-FROM node:18-alpine AS build
+# Use Bun for building the app
+FROM oven/bun:latest AS build
 
 # Set working directory
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+COPY package.json bun.lockb ./
 
 # Install dependencies
-RUN npm ci
+RUN bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
 
 # Build the app
-RUN npm run build
+RUN bun run build
 
 # Use nginx to serve the static files
 FROM nginx:alpine
