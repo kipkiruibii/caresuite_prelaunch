@@ -231,7 +231,7 @@ export default function WaitlistForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('https://api.caresuite.care/api/v1/website/waiting-list', {
+      const response = await fetch('/api/v1/website/waiting-list', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
