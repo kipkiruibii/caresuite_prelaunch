@@ -230,8 +230,9 @@ export default function WaitlistForm() {
     e.preventDefault();
     setIsSubmitting(true);
 
+    const apiBase = import.meta.env.DEV ? '/api' : 'https://api.caresuite.care';
     try {
-      const response = await fetch('/api/v1/website/waiting-list', {
+      const response = await fetch(`${apiBase}/api/v1/website/waiting-list`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
